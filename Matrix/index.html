@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор матрицы</title>
+    <script src="js/CSInterface.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>🧩 Генератор матрицы v.3</h2>
+        
+        <div class="hint">
+            📁 Используются слои из папки <strong>"Matrix"</strong><br>
+            📂 Результат сохраняется в новую папку <strong>"MatrixResult_дата_время"</strong>
+        </div>
+        
+        <div class="input-group">
+            <label>P:</label>
+            <input type="number" id="rowsInput" value="3" min="1" max="20">
+            <label style="min-width: 20px;">M:</label>
+            <input type="number" id="colsInput" value="3" min="1" max="20">
+        </div>
+        
+        <button class="btn btn-primary" id="generateBtn">
+            🎲 Сгенерировать матрицу
+        </button>
+        
+        <div class="divider"></div>
+        
+        <div class="btn-group-vertical">
+            <button class="btn btn-success" id="folderInfoBtn">
+                📁 Информация о папке Matrix
+            </button>
+            
+            <button class="btn btn-secondary" id="listResultsBtn">
+                📂 Список папок с результатами
+            </button>
+            
+            <button class="btn btn-purple" id="matrixOnlyBtn">
+                📋 Только матрица чисел
+            </button>
+            
+            <button class="btn btn-danger" id="deleteAllBtn">
+                🗑️ Удалить все папки с результатами
+            </button>
+            
+            <button class="btn btn-secondary" id="clearBtn">
+                🗑️ Очистить вывод
+            </button>
+        </div>
+        
+        <div id="output">💡 Нажмите "Сгенерировать матрицу"</div>
+        
+        <div class="footer">
+            <span class="status-badge status-ready" id="statusBadge">● Готов</span>
+        </div>
+    </div>
+    
+    <script>
+        var csInterface = new CSInterface();
+        var output = document.getElementById('output');
+        var statusBadge = document.getElementById('statusBadge');
+        
+        function runScript(script, label) {
+            output.className = '';
+            output.textContent = "⏳ " + label + "...";
+            statusBadge.textContent = '● Выполняется';
+            statusBadge.className = 'status-badge status-working';
+            
+            csInterface.evalScript(script, function(result) {
+                if (typeof result === 'string' && result.indexOf('❌') !== -1) {
+                    output.className = 'error';
+                    statusBadge.textContent = '● Ошибка';
+                    statusBadge.className = 'status-badge status-error';
+                } else {
+                    output.className = '';
+                    statusBadge.textContent = '● Готов';
+                    statusBadge.className = 'status-badge status-ready';
+                }
+                output.textContent = result;
+            });
+        }
+        
+        // Генерация матрицы
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            var p = parseInt(document.getElementById('rowsInput').value);
+            var m = parseInt(document.getElementById('colsInput').value);
+            
+            if (isNaN(p) || isNaN(m) || p < 1 || m < 1) {
+                output.className = 'error';
+                output.textContent = '❌ Введите корректные значения P и M';
+                return;
+            }
+            if (p > 20 || m > 20) {
+                output.className = 'error';
+                output.textContent = '❌ Значения не должны превышать 20';
+                return;
+            }
+            
+            runScript('generateMatrixInNewFolder(' + p + ', ' + m + ');', 
+                     'Генерирую матрицу ' + p + 'x' + m);
+        });
+        
+        // Информация о папке Matrix
+        document.getElementById('folderInfoBtn').addEventListener('click', function() {
+            runScript('getMatrixFolderInfo();', 'Поиск папки Matrix');
+        });
+        
+        // Список папок с результатами
+        document.getElementById('listResultsBtn').addEventListener('click', function() {
+            runScript('getResultFolders();', 'Получаю список папок');
+        });
+        
+        // Только матрица чисел
+        document.getElementById('matrixOnlyBtn').addEventListener('click', function() {
+            var p = parseInt(document.getElementById('rowsInput').value);
+            var m = parseInt(document.getElementById('colsInput').value);
+            
+            if (isNaN(p) || isNaN(m) || p < 1 || m < 1) {
+                output.className = 'error';
+                output.textContent = '❌ Введите корректные значения P и M';
+                return;
+            }
+            
+            runScript('generateNumberMatrix(' + p + ', ' + m + ');', 
+                     'Генерирую матрицу чисел');
+        });
+        
+        // Удаление всех папок с результатами
+        document.getElementById('deleteAllBtn').addEventListener('click', function() {
+            if (confirm('Удалить все папки с результатами MatrixResult_* ?')) {
+                runScript('clearResultFolders();', 'Удаляю папки с результатами');
+            }
+        });
+        
+        // Очистка вывода
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            output.className = '';
+            output.textContent = '💡 Готов к работе';
+            statusBadge.textContent = '● Готов';
+            statusBadge.className = 'status-badge status-ready';
+        });
+        
+        // Enter
+        document.getElementById('rowsInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('generateBtn').click();
+        });
+        document.getElementById('colsInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('generateBtn').click();
+        });
+        
+        console.log('🧩 Плагин "Генератор матрицы" загружен!');
+    </script>
+</body>
+</html>
